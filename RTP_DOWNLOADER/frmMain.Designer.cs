@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -44,6 +45,7 @@
             this.progressBarDownloadStatus = new System.Windows.Forms.ProgressBar();
             this.panelProgess = new System.Windows.Forms.TableLayoutPanel();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.timerDownload = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.panelInfo.SuspendLayout();
             this.panelDownload.SuspendLayout();
@@ -56,11 +58,11 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(115, 0);
+            this.label1.Location = new System.Drawing.Point(78, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(396, 50);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Download Media RTP Play";
+            this.label1.Text = "RTP Play Media Download";
             this.label1.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             // 
             // tableLayoutPanel1
@@ -75,7 +77,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(626, 50);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(553, 50);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // panelInfo
@@ -100,7 +102,7 @@
             this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 52F));
-            this.panelInfo.Size = new System.Drawing.Size(626, 151);
+            this.panelInfo.Size = new System.Drawing.Size(553, 151);
             this.panelInfo.TabIndex = 2;
             // 
             // label3
@@ -108,7 +110,7 @@
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(98, 118);
+            this.label3.Location = new System.Drawing.Point(78, 118);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(64, 13);
             this.label3.TabIndex = 1;
@@ -117,9 +119,9 @@
             // txtUrl
             // 
             this.txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtUrl.Location = new System.Drawing.Point(168, 49);
+            this.txtUrl.Location = new System.Drawing.Point(148, 49);
             this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(324, 20);
+            this.txtUrl.Size = new System.Drawing.Size(286, 20);
             this.txtUrl.TabIndex = 1;
             this.txtUrl.TextChanged += new System.EventHandler(this.txtUrl_TextChanged);
             this.txtUrl.Leave += new System.EventHandler(this.txtUrl_Leave);
@@ -130,7 +132,7 @@
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(69, 53);
+            this.label2.Location = new System.Drawing.Point(49, 53);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(93, 13);
             this.label2.TabIndex = 0;
@@ -139,9 +141,9 @@
             // btnSelectFolder
             // 
             this.btnSelectFolder.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.btnSelectFolder.Location = new System.Drawing.Point(498, 113);
+            this.btnSelectFolder.Location = new System.Drawing.Point(440, 113);
             this.btnSelectFolder.Name = "btnSelectFolder";
-            this.btnSelectFolder.Size = new System.Drawing.Size(116, 23);
+            this.btnSelectFolder.Size = new System.Drawing.Size(110, 23);
             this.btnSelectFolder.TabIndex = 3;
             this.btnSelectFolder.Text = "Escolher Pasta";
             this.btnSelectFolder.UseVisualStyleBackColor = true;
@@ -150,15 +152,15 @@
             // txtPath
             // 
             this.txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtPath.Location = new System.Drawing.Point(168, 115);
+            this.txtPath.Location = new System.Drawing.Point(148, 115);
             this.txtPath.Name = "txtPath";
-            this.txtPath.Size = new System.Drawing.Size(324, 20);
+            this.txtPath.Size = new System.Drawing.Size(286, 20);
             this.txtPath.TabIndex = 2;
             // 
             // progressBarLoadingSite
             // 
             this.progressBarLoadingSite.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.progressBarLoadingSite.Location = new System.Drawing.Point(498, 50);
+            this.progressBarLoadingSite.Location = new System.Drawing.Point(440, 50);
             this.progressBarLoadingSite.Name = "progressBarLoadingSite";
             this.progressBarLoadingSite.Size = new System.Drawing.Size(54, 18);
             this.progressBarLoadingSite.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
@@ -169,7 +171,7 @@
             this.lblNome.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lblNome.AutoSize = true;
             this.lblNome.ForeColor = System.Drawing.Color.White;
-            this.lblNome.Location = new System.Drawing.Point(313, 79);
+            this.lblNome.Location = new System.Drawing.Point(274, 79);
             this.lblNome.Name = "lblNome";
             this.lblNome.Size = new System.Drawing.Size(33, 13);
             this.lblNome.TabIndex = 5;
@@ -186,13 +188,13 @@
             this.panelDownload.Name = "panelDownload";
             this.panelDownload.RowCount = 1;
             this.panelDownload.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.panelDownload.Size = new System.Drawing.Size(626, 36);
+            this.panelDownload.Size = new System.Drawing.Size(553, 36);
             this.panelDownload.TabIndex = 3;
             // 
             // btnDownload
             // 
             this.btnDownload.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnDownload.Location = new System.Drawing.Point(275, 6);
+            this.btnDownload.Location = new System.Drawing.Point(239, 6);
             this.btnDownload.Name = "btnDownload";
             this.btnDownload.Size = new System.Drawing.Size(75, 23);
             this.btnDownload.TabIndex = 4;
@@ -203,10 +205,10 @@
             // progressBarDownloadStatus
             // 
             this.progressBarDownloadStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBarDownloadStatus.Location = new System.Drawing.Point(281, 6);
+            this.progressBarDownloadStatus.Location = new System.Drawing.Point(250, 6);
             this.progressBarDownloadStatus.Name = "progressBarDownloadStatus";
-            this.progressBarDownloadStatus.Size = new System.Drawing.Size(253, 23);
-            this.progressBarDownloadStatus.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.progressBarDownloadStatus.Size = new System.Drawing.Size(211, 23);
+            this.progressBarDownloadStatus.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBarDownloadStatus.TabIndex = 4;
             // 
             // panelProgess
@@ -223,13 +225,13 @@
             this.panelProgess.Name = "panelProgess";
             this.panelProgess.RowCount = 1;
             this.panelProgess.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.panelProgess.Size = new System.Drawing.Size(626, 36);
+            this.panelProgess.Size = new System.Drawing.Size(553, 36);
             this.panelProgess.TabIndex = 5;
             // 
             // btnCancel
             // 
             this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.btnCancel.Location = new System.Drawing.Point(200, 6);
+            this.btnCancel.Location = new System.Drawing.Point(169, 6);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 5;
@@ -237,12 +239,17 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // timerDownload
+            // 
+            this.timerDownload.Interval = 1000;
+            this.timerDownload.Tick += new System.EventHandler(this.timerDownload_Tick);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.MidnightBlue;
-            this.ClientSize = new System.Drawing.Size(626, 240);
+            this.ClientSize = new System.Drawing.Size(553, 240);
             this.Controls.Add(this.panelProgess);
             this.Controls.Add(this.panelDownload);
             this.Controls.Add(this.panelInfo);
@@ -252,7 +259,7 @@
             this.MinimumSize = new System.Drawing.Size(440, 279);
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "RTP Play Downloads";
+            this.Text = "RTP Play Tool";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -281,6 +288,7 @@
         private System.Windows.Forms.TextBox txtPath;
         private System.Windows.Forms.ProgressBar progressBarLoadingSite;
         private System.Windows.Forms.Label lblNome;
+        private System.Windows.Forms.Timer timerDownload;
     }
 }
 

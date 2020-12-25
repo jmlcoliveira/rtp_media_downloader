@@ -36,9 +36,6 @@ namespace RTP_DOWNLOADER
             txtPath.Enabled = false;
             panelProgess.Hide();
             progressBarLoadingSite.Hide();
-
-            webClient.DownloadProgressChanged += Client_DownloadProgressChanged;
-            webClient.DownloadFileCompleted += Client_DownloadFileCompleted;
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
@@ -65,39 +62,45 @@ namespace RTP_DOWNLOADER
         {
             var worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(startDownload);
+            worker.RunWorkerCompleted += Worker_RunWorkerCompleted1;
 
             worker.RunWorkerAsync();
 
-            WebClient downloadSize = new WebClient();
-            downloadSize.OpenRead(programa.getFileURL());
-            Int64 bytes_total = Convert.ToInt64(downloadSize.ResponseHeaders["Content-Length"]);
-            //MessageBox.Show((bytes_total * Math.Pow(1024, -2)).ToString());
+            timerDownload.Start();
+
 
             panelDownload.Hide();
             panelProgess.Show();
         }
 
+        private void Worker_RunWorkerCompleted1(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBarDownloadStatus.Value = getPrograssBarSize();
+            timerDownload.Stop();
+            reset();
+        }
+
+        private void reset()
+        {
+            txtUrl.Text = "";
+            progressBarDownloadStatus.Value = 0;
+            panelProgess.Hide();
+            panelDownload.Show();
+            lblNome.Hide();
+        }
+
         private void startDownload(object sender, DoWorkEventArgs e)
         {
-            var fileType = programa.getFileURL().Split('.').Last();
             try
             {
-                webClient.DownloadFile(programa.getFileURL(), downloadPath + "\\" + programa.getNomeFormatado() + $".{fileType}");
+                string name = downloadPath + "\\" + programa.getNomeFormatado() + programa.getFileType();
+
+                webClient.DownloadFile(programa.getFileURL(), name);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-        }
-
-        private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            MessageBox.Show("Download realizado com sucesso");
-        }
-
-        private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
-        {
-            MessageBox.Show("Test");
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -114,7 +117,6 @@ namespace RTP_DOWNLOADER
                 panelDownload.Show();
                 panelProgess.Hide();
             }
-
         }
 
         private void btnSelectFolder_Click(object sender, EventArgs e)
@@ -196,6 +198,19 @@ namespace RTP_DOWNLOADER
             }
         }
 
+        private void timerDownload_Tick(object sender, EventArgs e)
+        {
+            progressBarDownloadStatus.Value = getPrograssBarSize();
+        }
+
+        private int getPrograssBarSize()
+        {
+            FileInfo info = new FileInfo(downloadPath + "\\" + programa.getNomeFormatado() + programa.getFileType());
+            long currentSize = info.Length;
+
+            return (int)((currentSize * 100) / programa.getSize());
+        }
+
         private void initializePrograma(object sender, DoWorkEventArgs e)
         {
             websiteLoaded = false;
@@ -233,14 +248,18 @@ namespace RTP_DOWNLOADER
                             nome = pageContent.Substring(index).Split('\"', '\"')[2];
                     }
 
-                    this.programa = new Programa(nome, episodio, fileURL);
+                    WebClient downloadSize = new WebClient();
+                    downloadSize.OpenRead(fileURL);
+                    long size_bytes = Convert.ToInt64(downloadSize.ResponseHeaders["Content-Length"]);
+
+                    this.programa = new Programa(nome, episodio, fileURL, size_bytes);
                 }
             }
             catch (Exception ex)
             {
                 if (ex.Message.Contains("404"))
                 {
-                    
+
                 }
             }
         }

@@ -8,13 +8,21 @@ namespace RTP_DOWNLOADER
 {
     public class Programa
     {
-        private string nome, episodio, fileURL;
+        private string nome, episodio, fileURL, fileType;
+        private long size;
 
-        public Programa(string nome, string episodio, string file)
+        public Programa(string nome, string episodio, string file, long size)
         {
             this.nome = nome/*.Replace(" ", "_")*/;
             this.episodio = episodio/*.Replace(" ", "_")*/;
             this.fileURL = file;
+            fileType = "." + fileURL.Split('.').Last();
+            this.size = size;
+        }
+
+        public string getFileType()
+        {
+            return fileType;
         }
 
         public string getNome()
@@ -35,6 +43,11 @@ namespace RTP_DOWNLOADER
         public string getFileURL()
         {
             return fileURL;
+        }
+
+        public long getSize()
+        {
+            return size;
         }
 
         public string getComando()
