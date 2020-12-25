@@ -19,9 +19,10 @@ namespace RTP_DOWNLOADER
     public partial class frmMain : Form
     {
         private string downloadPath, url;
-        private Process process;
         private readonly string urlValidation = "www.rtp.pt/play";
         private Programa programa;
+        private WebClient webClient = new WebClient();
+        private bool websiteLoaded = false;
 
         public frmMain()
         {
@@ -30,27 +31,26 @@ namespace RTP_DOWNLOADER
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            if (!Helper.checkInstalled("Streamlink"))
-            {
-                MessageBox.Show("Required program missing!");
-                var currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                Process proc = Process.Start(currentDirectory + "\\streamlink-2.0.0.exe");
-                proc.WaitForExit();
-            }
             this.downloadPath = ConfigurationManager.AppSettings["lastSaveLocation"];
             txtPath.Text = this.downloadPath;
             txtPath.Enabled = false;
             panelProgess.Hide();
+            progressBarLoadingSite.Hide();
+
+            webClient.DownloadProgressChanged += Client_DownloadProgressChanged;
+            webClient.DownloadFileCompleted += Client_DownloadFileCompleted;
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            if (txtUrl.Text == "" || downloadPath == "")
+            if (txtUrl.Text == "" || downloadPath == "" || !websiteLoaded)
             {
                 if (txtUrl.Text == "")
                     MessageBox.Show("URL não especificado", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else if (downloadPath == "")
                     MessageBox.Show("Localização para guardar não especificada", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                else if (!websiteLoaded)
+                    MessageBox.Show("Os dados da media ainda estão a ser carregados!");
                 return;
             }
             else if (!txtUrl.Text.Contains(urlValidation))
@@ -58,54 +58,46 @@ namespace RTP_DOWNLOADER
                 MessageBox.Show("URL inválido", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            handleDownload();
+            HandleDownload();
         }
 
-        private void handleDownload()
+        private void HandleDownload()
         {
-            this.process = ExecuteCommand(programa.getComando());
+            var worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(startDownload);
 
+            worker.RunWorkerAsync();
+
+            WebClient downloadSize = new WebClient();
+            downloadSize.OpenRead(programa.getFileURL());
+            Int64 bytes_total = Convert.ToInt64(downloadSize.ResponseHeaders["Content-Length"]);
+            //MessageBox.Show((bytes_total * Math.Pow(1024, -2)).ToString());
 
             panelDownload.Hide();
             panelProgess.Show();
-
-            verificarProcesso.Start();
-
-            //MessageBox.Show("Download realizado com sucesso");
         }
 
-        private void verificarProcesso_Tick(object sender, EventArgs e)
+        private void startDownload(object sender, DoWorkEventArgs e)
         {
-            if (process.HasExited)
+            var fileType = programa.getFileURL().Split('.').Last();
+            try
             {
-                verificarProcesso.Stop();
-
-                panelDownload.Show();
-                panelProgess.Hide();
-                txtUrl.Text = "";
-                MessageBox.Show("Download Concluído");
-                try
-                {
-                    Process.Start(this.downloadPath);
-                }
-                catch (Exception)
-                {
-
-                }
+                webClient.DownloadFile(programa.getFileURL(), downloadPath + "\\" + programa.getNomeFormatado() + $".{fileType}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
-        public Process ExecuteCommand(string Command)
+        private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            ProcessStartInfo ProcessInfo;
+            MessageBox.Show("Download realizado com sucesso");
+        }
 
-            ProcessInfo = new ProcessStartInfo("powershell.exe", Command);
-            ProcessInfo.WorkingDirectory = this.downloadPath;
-            ProcessInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            ProcessInfo.CreateNoWindow = true;
-            ProcessInfo.UseShellExecute = true;
-
-            return Process.Start(ProcessInfo);
+        private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            MessageBox.Show("Test");
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -118,15 +110,7 @@ namespace RTP_DOWNLOADER
             var dialogResult = MessageBox.Show("Tem a certeza que pretende sair?", "Aviso", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)
             {
-                try
-                {
-                    this.process.CloseMainWindow();
-                }
-                catch (Exception)
-                {
-
-                }
-
+                webClient.CancelAsync();
                 panelDownload.Show();
                 panelProgess.Hide();
             }
@@ -145,12 +129,18 @@ namespace RTP_DOWNLOADER
                     this.downloadPath = dialog.FileName;
                     txtPath.Text = this.downloadPath;
 
+                    try
+                    {
+                        var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                        config.AppSettings.Settings["lastSaveLocation"].Value = this.downloadPath;
+                        config.Save(ConfigurationSaveMode.Modified);
 
-                    var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                    config.AppSettings.Settings["lastSaveLocation"].Value = this.downloadPath;
-                    config.Save(ConfigurationSaveMode.Modified);
-
-                    ConfigurationManager.RefreshSection("appSettings");
+                        ConfigurationManager.RefreshSection("appSettings");
+                    }
+                    catch (Exception)
+                    {
+                        //can happen if user has not open program has admin
+                    }
                 }
             }
             catch (Exception ex)
@@ -161,42 +151,96 @@ namespace RTP_DOWNLOADER
 
         private void txtUrl_Leave(object sender, EventArgs e)
         {
-            initializePrograma();
+            if (txtUrl.Text.Contains(urlValidation) && txtUrl.Text != this.url)
+            {
+                var worker = new BackgroundWorker();
+                progressBarLoadingSite.Show();
+                worker.DoWork += new DoWorkEventHandler(initializePrograma);
+                worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+
+                worker.RunWorkerAsync();
+            }
+        }
+
+        private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBarLoadingSite.Hide();
+            websiteLoaded = true;
+            lblNome.Text = programa.getNome();
+            lblNome.Show();
         }
 
         private void txtUrl_MouseLeave(object sender, EventArgs e)
         {
-            initializePrograma();
+            if (txtUrl.Text.Contains(urlValidation) && txtUrl.Text != this.url)
+            {
+                progressBarLoadingSite.Show();
+                var worker = new BackgroundWorker();
+                worker.DoWork += new DoWorkEventHandler(initializePrograma);
+                worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+
+                worker.RunWorkerAsync();
+            }
         }
 
-        private void initializePrograma()
+        private void txtUrl_TextChanged(object sender, EventArgs e)
         {
             if (txtUrl.Text.Contains(urlValidation) && txtUrl.Text != this.url)
             {
-                this.url = txtUrl.Text;
-                string pageContent = null;
+                progressBarLoadingSite.Show();
+                var worker = new BackgroundWorker();
+                worker.DoWork += new DoWorkEventHandler(initializePrograma);
+                worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+
+                worker.RunWorkerAsync();
+            }
+        }
+
+        private void initializePrograma(object sender, DoWorkEventArgs e)
+        {
+            websiteLoaded = false;
+
+            this.url = txtUrl.Text;
+            string pageContent = null;
+            try
+            {
                 HttpWebRequest myReq = (HttpWebRequest)WebRequest.Create(txtUrl.Text);
                 HttpWebResponse myres = (HttpWebResponse)myReq.GetResponse();
-                using (StreamReader sr = new StreamReader(myres.GetResponseStream()))
+                using (StreamReader sr = new StreamReader(myres.GetResponseStream(), Encoding.ASCII))
                 {
                     pageContent = sr.ReadToEnd();
                 }
 
-                if (pageContent.Contains("master.mpd"))
+                if (pageContent.Contains("fileKey:"))
                 {
-                    int index = pageContent.IndexOf("master.mpd");
-                    string dash = pageContent.Substring(0, index).Split('\"').Last() + "master.mpd";
+                    int index = pageContent.IndexOf("fileKey:");
+                    string fileURL = pageContent.Substring(index).Split('\"', '\"')[1];
+                    fileURL = "https://ondemand.rtp.pt" + fileURL;
+
                     index = pageContent.IndexOf("episode-number");
                     string episodio = "0";
                     if (index != -1)
                         episodio = pageContent.Substring(index).Split('>', '<')[1];
 
                     index = pageContent.IndexOf("vod-title");
-                    string nome = "name_not_found";
+                    string nome = "Erro a obter nome";
                     if (index != -1)
                         nome = pageContent.Substring(index).Split('>', '<')[1];
+                    else
+                    {
+                        index = pageContent.IndexOf("twitter:title");
+                        if (index != -1)
+                            nome = pageContent.Substring(index).Split('\"', '\"')[2];
+                    }
 
-                    this.programa = new Programa(nome, episodio, dash);
+                    this.programa = new Programa(nome, episodio, fileURL);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("404"))
+                {
+                    
                 }
             }
         }

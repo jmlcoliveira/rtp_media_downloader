@@ -8,13 +8,13 @@ namespace RTP_DOWNLOADER
 {
     public class Programa
     {
-        private string nome, episodio, dash;
+        private string nome, episodio, fileURL;
 
-        public Programa(string nome, string episodio, string dash)
+        public Programa(string nome, string episodio, string file)
         {
-            this.nome = nome.Replace(" ", "_");
-            this.episodio = episodio.Replace(" ", "_");
-            this.dash = dash;
+            this.nome = nome/*.Replace(" ", "_")*/;
+            this.episodio = episodio/*.Replace(" ", "_")*/;
+            this.fileURL = file;
         }
 
         public string getNome()
@@ -22,19 +22,24 @@ namespace RTP_DOWNLOADER
             return nome;
         }
 
-        public string nEpisodio()
+        public string getNomeFormatado()
+        {
+            return nome.Replace(" ", "_").Replace("?", "_");
+        }
+
+        public string getEpisodio()
         {
             return episodio;
         }
 
-        public string getDash()
+        public string getFileURL()
         {
-            return dash;
+            return fileURL;
         }
 
         public string getComando()
         {
-            return $"Streamlink --http-header \"User-Agent=xxxxx\" --http-header \"Referer=xxxxx\" \"{dash}\" best --output \"{episodio + "_" + nome}.mp4\"";
+            return $"Streamlink --http-header \"User-Agent=xxxxx\" --http-header \"Referer=xxxxx\" \"{fileURL}\" best --output \"{episodio + "_" + nome}.mp4\"";
         }
     }
 }

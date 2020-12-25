@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -38,12 +37,13 @@
             this.label2 = new System.Windows.Forms.Label();
             this.btnSelectFolder = new System.Windows.Forms.Button();
             this.txtPath = new System.Windows.Forms.TextBox();
+            this.progressBarLoadingSite = new System.Windows.Forms.ProgressBar();
+            this.lblNome = new System.Windows.Forms.Label();
             this.panelDownload = new System.Windows.Forms.TableLayoutPanel();
             this.btnDownload = new System.Windows.Forms.Button();
             this.progressBarDownloadStatus = new System.Windows.Forms.ProgressBar();
             this.panelProgess = new System.Windows.Forms.TableLayoutPanel();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.verificarProcesso = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.panelInfo.SuspendLayout();
             this.panelDownload.SuspendLayout();
@@ -85,17 +85,20 @@
             this.panelInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 18.21086F));
             this.panelInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.9511F));
             this.panelInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20.74199F));
-            this.panelInfo.Controls.Add(this.label3, 1, 2);
+            this.panelInfo.Controls.Add(this.label3, 1, 3);
             this.panelInfo.Controls.Add(this.txtUrl, 2, 1);
             this.panelInfo.Controls.Add(this.label2, 1, 1);
-            this.panelInfo.Controls.Add(this.btnSelectFolder, 3, 2);
-            this.panelInfo.Controls.Add(this.txtPath, 2, 2);
+            this.panelInfo.Controls.Add(this.btnSelectFolder, 3, 3);
+            this.panelInfo.Controls.Add(this.txtPath, 2, 3);
+            this.panelInfo.Controls.Add(this.progressBarLoadingSite, 3, 1);
+            this.panelInfo.Controls.Add(this.lblNome, 2, 2);
             this.panelInfo.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelInfo.Location = new System.Drawing.Point(0, 50);
             this.panelInfo.Name = "panelInfo";
-            this.panelInfo.RowCount = 3;
+            this.panelInfo.RowCount = 4;
             this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.panelInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 52F));
             this.panelInfo.Size = new System.Drawing.Size(626, 151);
             this.panelInfo.TabIndex = 2;
@@ -114,10 +117,11 @@
             // txtUrl
             // 
             this.txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtUrl.Location = new System.Drawing.Point(168, 59);
+            this.txtUrl.Location = new System.Drawing.Point(168, 49);
             this.txtUrl.Name = "txtUrl";
             this.txtUrl.Size = new System.Drawing.Size(324, 20);
             this.txtUrl.TabIndex = 1;
+            this.txtUrl.TextChanged += new System.EventHandler(this.txtUrl_TextChanged);
             this.txtUrl.Leave += new System.EventHandler(this.txtUrl_Leave);
             this.txtUrl.MouseLeave += new System.EventHandler(this.txtUrl_MouseLeave);
             // 
@@ -126,7 +130,7 @@
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(69, 63);
+            this.label2.Location = new System.Drawing.Point(69, 53);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(93, 13);
             this.label2.TabIndex = 0;
@@ -150,6 +154,27 @@
             this.txtPath.Name = "txtPath";
             this.txtPath.Size = new System.Drawing.Size(324, 20);
             this.txtPath.TabIndex = 2;
+            // 
+            // progressBarLoadingSite
+            // 
+            this.progressBarLoadingSite.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.progressBarLoadingSite.Location = new System.Drawing.Point(498, 50);
+            this.progressBarLoadingSite.Name = "progressBarLoadingSite";
+            this.progressBarLoadingSite.Size = new System.Drawing.Size(54, 18);
+            this.progressBarLoadingSite.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.progressBarLoadingSite.TabIndex = 4;
+            // 
+            // lblNome
+            // 
+            this.lblNome.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.lblNome.AutoSize = true;
+            this.lblNome.ForeColor = System.Drawing.Color.White;
+            this.lblNome.Location = new System.Drawing.Point(313, 79);
+            this.lblNome.Name = "lblNome";
+            this.lblNome.Size = new System.Drawing.Size(33, 13);
+            this.lblNome.TabIndex = 5;
+            this.lblNome.Text = "nome";
+            this.lblNome.Visible = false;
             // 
             // panelDownload
             // 
@@ -212,11 +237,6 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // verificarProcesso
-            // 
-            this.verificarProcesso.Interval = 5000;
-            this.verificarProcesso.Tick += new System.EventHandler(this.verificarProcesso_Tick);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -259,7 +279,8 @@
         private System.Windows.Forms.TableLayoutPanel panelProgess;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.TextBox txtPath;
-        private System.Windows.Forms.Timer verificarProcesso;
+        private System.Windows.Forms.ProgressBar progressBarLoadingSite;
+        private System.Windows.Forms.Label lblNome;
     }
 }
 
