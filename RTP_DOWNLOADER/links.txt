@@ -1,0 +1,3 @@
+Streamlink --http-header "User-Agent=xxxxx" --http-header "Referer=xxxxx" "https://streaming-ondemand.rtp.pt/nas2.share/h264/512x384/p8013/p8013_2_202012022155193492/master.mpd" best --output "01_Os_Malandros.mp4"
+Streamlink --http-header "User-Agent=xxxxx" --http-header "Referer=xxxxx" "https://streaming-ondemand.rtp.pt/nas2.share/h264/512x384/p8013/p8013_2_202012105027/master.mpd" best --output "02_Arnaldo_o_Figurante.mp4"
+Streamlink --http-header "User-Agent=xxxxx" --http-header "Referer=xxxxx" "https://streaming-ondemand.rtp.pt/nas2.share/h264/512x384/p8013/p8013_1_202012161610069936d/master.mpd" best --output "03_Adelaide_a_Magrinha.mp4"

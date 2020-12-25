@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTP_DOWNLOADER", "RTP_DOWNLOADER\RTP_DOWNLOADER.csproj", "{4DFECFB2-0700-4364-9CF8-F3E5E5739708}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{5D9C66C7-E127-4E50-9B37-D3B8B51F2047}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4DFECFB2-0700-4364-9CF8-F3E5E5739708}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DFECFB2-0700-4364-9CF8-F3E5E5739708}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DFECFB2-0700-4364-9CF8-F3E5E5739708}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DFECFB2-0700-4364-9CF8-F3E5E5739708}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D9C66C7-E127-4E50-9B37-D3B8B51F2047}.Debug|Any CPU.ActiveCfg = Debug
+		{5D9C66C7-E127-4E50-9B37-D3B8B51F2047}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0271A035-DD9B-4222-B1F7-723132715C0D}
+	EndGlobalSection
+EndGlobal
