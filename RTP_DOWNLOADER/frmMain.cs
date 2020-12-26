@@ -1,18 +1,12 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Configuration;
-using System.Threading;
+using RTP_DOWNLOADER.Properties;
+using System.Drawing;
 
 namespace RTP_DOWNLOADER
 {
@@ -22,7 +16,7 @@ namespace RTP_DOWNLOADER
         private readonly string urlValidation = "www.rtp.pt/play";
         private Programa programa;
         private WebClient webClient = new WebClient();
-        private bool websiteLoaded = false;
+        private bool hasWebsiteBeenLoaded = false;
 
         public frmMain()
         {
@@ -31,22 +25,23 @@ namespace RTP_DOWNLOADER
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            this.downloadPath = ConfigurationManager.AppSettings["lastSaveLocation"];
+            this.downloadPath = Settings.Default["downloadPath"].ToString();
             txtPath.Text = this.downloadPath;
             txtPath.Enabled = false;
-            panelProgess.Hide();
+            gbDownloadStatus.Hide();
             progressBarLoadingSite.Hide();
+
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            if (txtUrl.Text == "" || downloadPath == "" || !websiteLoaded)
+            if (txtUrl.Text == "" || downloadPath == "" || !hasWebsiteBeenLoaded)
             {
                 if (txtUrl.Text == "")
                     MessageBox.Show("URL não especificado", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else if (downloadPath == "")
                     MessageBox.Show("Localização para guardar não especificada", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                else if (!websiteLoaded)
+                else if (!hasWebsiteBeenLoaded)
                     MessageBox.Show("Os dados da media ainda estão a ser carregados!");
                 return;
             }
@@ -69,10 +64,10 @@ namespace RTP_DOWNLOADER
             timerDownload.Start();
 
 
-            panelDownload.Hide();
-            panelProgess.Show();
+            gbDownloadStatus.Show();
         }
 
+        //worker finnished event leting know the download has been concluded
         private void Worker_RunWorkerCompleted1(object sender, RunWorkerCompletedEventArgs e)
         {
             progressBarDownloadStatus.Value = getPrograssBarSize();
@@ -80,12 +75,12 @@ namespace RTP_DOWNLOADER
             reset();
         }
 
+        //reset form status
         private void reset()
         {
             txtUrl.Text = "";
             progressBarDownloadStatus.Value = 0;
-            panelProgess.Hide();
-            panelDownload.Show();
+            gbDownloadStatus.Hide();
             lblNome.Hide();
         }
 
@@ -99,7 +94,8 @@ namespace RTP_DOWNLOADER
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                if (!ex.Message.Contains("aborted"))
+                    MessageBox.Show(ex.Message);
             }
         }
 
@@ -110,12 +106,11 @@ namespace RTP_DOWNLOADER
 
         private void handleCancel()
         {
-            var dialogResult = MessageBox.Show("Tem a certeza que pretende sair?", "Aviso", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-            if (dialogResult == DialogResult.Yes)
+            var dialogResult = MessageBox.Show("Tem a certeza que pretende cancelar?", "Questão", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (dialogResult == DialogResult.OK)
             {
                 webClient.CancelAsync();
-                panelDownload.Show();
-                panelProgess.Hide();
+                gbDownloadStatus.Hide();
             }
         }
 
@@ -133,11 +128,8 @@ namespace RTP_DOWNLOADER
 
                     try
                     {
-                        var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                        config.AppSettings.Settings["lastSaveLocation"].Value = this.downloadPath;
-                        config.Save(ConfigurationSaveMode.Modified);
-
-                        ConfigurationManager.RefreshSection("appSettings");
+                        Settings.Default["downloadPath"] = this.downloadPath;
+                        Settings.Default.Save();
                     }
                     catch (Exception)
                     {
@@ -151,6 +143,15 @@ namespace RTP_DOWNLOADER
             }
         }
 
+        private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBarLoadingSite.Hide();
+            hasWebsiteBeenLoaded = true;
+            lblNome.Text = programa.getNome();
+            lblNome.Show();
+        }
+
+        #region txtUrl text events, which starts the background worker to get the media info
         private void txtUrl_Leave(object sender, EventArgs e)
         {
             if (txtUrl.Text.Contains(urlValidation) && txtUrl.Text != this.url)
@@ -162,14 +163,6 @@ namespace RTP_DOWNLOADER
 
                 worker.RunWorkerAsync();
             }
-        }
-
-        private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            progressBarLoadingSite.Hide();
-            websiteLoaded = true;
-            lblNome.Text = programa.getNome();
-            lblNome.Show();
         }
 
         private void txtUrl_MouseLeave(object sender, EventArgs e)
@@ -197,23 +190,44 @@ namespace RTP_DOWNLOADER
                 worker.RunWorkerAsync();
             }
         }
+        #endregion
 
         private void timerDownload_Tick(object sender, EventArgs e)
         {
             progressBarDownloadStatus.Value = getPrograssBarSize();
         }
 
+        //gets the size of the downloaded content and 
+        //returns how much it has downloaded
         private int getPrograssBarSize()
         {
-            FileInfo info = new FileInfo(downloadPath + "\\" + programa.getNomeFormatado() + programa.getFileType());
-            long currentSize = info.Length;
+            lblStatus.Show();
+            lblStatus.BringToFront();
+
+            long currentSize = 0;
+
+            try
+            {
+                FileInfo info = new FileInfo(downloadPath + "\\" + programa.getNomeFormatado() + programa.getFileType());
+                currentSize = info.Length;
+            }
+            catch (Exception)
+            {
+
+            }
+
+            lblStatus.Text = (currentSize * Math.Pow(1024, -2)).ToString("0.##") + "MB/" + (programa.getSize() * Math.Pow(1024, -2)).ToString("0.##") + "MB";
 
             return (int)((currentSize * 100) / programa.getSize());
         }
 
+        /**
+         * Downloads website and searches for the media link.
+         * Also grabs the name of the media and the episode.
+         */
         private void initializePrograma(object sender, DoWorkEventArgs e)
         {
-            websiteLoaded = false;
+            hasWebsiteBeenLoaded = false;
 
             this.url = txtUrl.Text;
             string pageContent = null;
@@ -221,7 +235,7 @@ namespace RTP_DOWNLOADER
             {
                 HttpWebRequest myReq = (HttpWebRequest)WebRequest.Create(txtUrl.Text);
                 HttpWebResponse myres = (HttpWebResponse)myReq.GetResponse();
-                using (StreamReader sr = new StreamReader(myres.GetResponseStream(), Encoding.ASCII))
+                using (StreamReader sr = new StreamReader(myres.GetResponseStream(), Encoding.GetEncoding("ISO-8859-1")))
                 {
                     pageContent = sr.ReadToEnd();
                 }
@@ -248,6 +262,7 @@ namespace RTP_DOWNLOADER
                             nome = pageContent.Substring(index).Split('\"', '\"')[2];
                     }
 
+                    //get the media size
                     WebClient downloadSize = new WebClient();
                     downloadSize.OpenRead(fileURL);
                     long size_bytes = Convert.ToInt64(downloadSize.ResponseHeaders["Content-Length"]);
@@ -261,6 +276,7 @@ namespace RTP_DOWNLOADER
                 {
 
                 }
+                MessageBox.Show(ex.Message);
             }
         }
     }
